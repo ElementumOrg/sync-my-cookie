@@ -124,7 +124,7 @@ function getStyleLoaders(cssOptions, preProcessor, preProcessorOptions) {
   if (preProcessor) {
     loaders.push({
       loader: preProcessor,
-      options: preProcessorOptions,
+      options: preProcessor === 'sass-loader' ? { implementation: require('sass') } : preProcessorOptions,
     });
   }
   return loaders;
