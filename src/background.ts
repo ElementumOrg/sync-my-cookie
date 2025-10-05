@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import * as chromeUtil from './utils/chrome';
-import {auto, AutoConfiguration, gist} from './utils/store';
+import { auto, AutoConfiguration, gist } from './utils/store';
 
 const DEBOUNCE_DELAY = 10000;
 
@@ -9,19 +9,19 @@ const DEBOUNCE_DELAY = 10000;
 // Auto Merge
 const handleAutoMerge = async () => {
   await gist.updateData()
-  console.log('自动合并运行中');
+  console.log('Auto merge running');
   const list = (await filterDomain('autoMerge')).map(([domain]) => domain);
   if (list.length === 0) {
-    console.log('没有需要自动合并的域名');
+    console.log('No domains need auto merge');
     return;
   }
-  console.log(`共${list.length}个域名需要自动合并：${list.join(',')}`);
+  console.log(`Total ${list.length} domains need auto merge: ${list.join(',')}`);
   let done = 0;
   for (const domain of list) {
     const cookies = await gist.getCookies(domain);
     await chromeUtil.importCookies(cookies);
     done++;
-    console.log(`[${done}/${list.length}] ${domain}的${cookies.length}个Cookie已合并`);
+    console.log(`[${done}/${list.length}] ${cookies.length} cookies for ${domain} have been merged`);
   }
   if (done) {
     badge(`↓${done}`);
@@ -31,42 +31,42 @@ const handleAutoMerge = async () => {
 // Auto Push
 const handleAutoPush = _.debounce(async () => {
   try {
-    console.log('自动推送运行中');
+    console.log('Auto push running');
     const list = await filterDomain('autoPush');
     if (list.length === 0) {
-      console.log('没有需要自动推送的域名');
+      console.log('No domains need auto push');
       return;
     }
     console.log(list);
-    console.log(`${list.length}个域名需要自动推送：${list.map(([domain]) => domain).join(',')}`);
-    const bulk: Array<{domain: string, cookies: chrome.cookies.SetDetails[]}> = [];
+    console.log(`${list.length} domains need auto push: ${list.map(([domain]) => domain).join(',')}`);
+    const bulk: Array<{ domain: string, cookies: chrome.cookies.SetDetails[] }> = [];
     for (const [domain, config] of list) {
-      console.log(`正在处理域名${domain}`);
+      console.log(`Processing domain ${domain}`);
       const newCookies = await chromeUtil.exportCookies(domain);
       const oldCookies = await gist.getCookies(domain);
       let rules: string[];
       if (config.autoPushName.length === 0) {
-        console.log('该域名没有配置自动推送规则，默认将已保存的所有 Cookie 的 Name 作为规则');
+        console.log('No auto push rules configured for this domain, using all saved cookie names as rules by default');
         rules = _.uniq(oldCookies.map((cookie) => cookie.name as string));
       } else {
-        console.log(`自动推送 Name 规则：${config.autoPushName.join(',')}`);
+        console.log(`Auto push Name rules: ${config.autoPushName.join(',')}`);
         rules = config.autoPushName;
       }
 
       const oldCookiesFiltered = oldCookies.filter((cookie) => rules.includes(cookie.name as string));
       const newCookiesFiltered = newCookies.filter((cookie) => rules.includes(cookie.name as string));
-      // 数量测试，两者的数量必须相同
-      console.log('数量测试，两者的数量必须相同');
-      console.log(`Name过滤后，旧的共：${oldCookiesFiltered.length}个 新的共：${newCookiesFiltered.length}个`);
+      // Quantity test: both must have the same number
+      console.log('Quantity test: both must have the same number');
+      console.log(`After Name filter, old: ${oldCookiesFiltered.length}, new: ${newCookiesFiltered.length}`);
       if (oldCookiesFiltered.length !== newCookiesFiltered.length) {
-        console.log(`数量测试不通过，需要推送`);
-        bulk.push({domain, cookies: newCookies});
+        console.log('Quantity test failed, need to push');
+        bulk.push({ domain, cookies: newCookies });
         continue;
       }
-      console.log('数量测试通过');
+      console.log('Quantity test passed');
 
-      // 将 Cookie 数组转为 url##name => value, expirationDate 的 Object
-      console.log('将 Cookie 数组转为 url##name => value, expirationDate 的 Object');
+      // Convert cookie array to url##name => value, expirationDate object
+      console.log('Converting cookie array to url##name => value, expirationDate object');
       const oldProcessed = _.mapValues(
         _.keyBy(oldCookiesFiltered, (cookie) => `${cookie.url}##${cookie.name}`),
         (cookie) => _.pick(cookie, ['value', 'expirationDate']),
@@ -75,43 +75,43 @@ const handleAutoPush = _.debounce(async () => {
         _.keyBy(newCookiesFiltered, (cookie) => `${cookie.url}##${cookie.name}`),
         (cookie) => _.pick(cookie, ['value', 'expirationDate']),
       );
-      console.log('旧的处理后', oldProcessed);
-      console.log('新的处理后', newProcessed);
+      console.log('Old processed', oldProcessed);
+      console.log('New processed', newProcessed);
 
-      // Key 测试，两者的 Key 组成必须完全相同
-      console.log('Key 测试，两者的 Key 组成必须完全相同');
+      // Key test: both must have exactly the same keys
+      console.log('Key test: both must have exactly the same keys');
       if (!_.isEqual(Object.keys(oldProcessed).sort(), Object.keys(newProcessed).sort())) {
-        console.log('Key 测试不通过，需要推送');
-        bulk.push({domain, cookies: newCookies});
+        console.log('Key test failed, need to push');
+        bulk.push({ domain, cookies: newCookies });
         continue;
       }
 
-      // 逐个测试，对应 value 必须相等，旧的过期剩余时间比新的过期剩余时间不能少于50%
-      console.log('Key 测试通过');
-      console.log('逐个测试，对应 value 必须相等，旧的过期剩余时间比新的过期剩余时间不能少于50%');
+      // Individual test: values must match, old expiration must not be less than 50% of new
+      console.log('Key test passed');
+      console.log('Individual test: values must match, old expiration must not be less than 50% of new');
       for (const key of Object.keys(oldProcessed)) {
         const oldOne = oldProcessed[key];
         const newOne = newProcessed[key];
         if (oldOne.value !== newOne.value) {
-          console.log(`${key}对应的value两者不一致，需要推送`);
-          bulk.push({domain, cookies: newCookies});
+          console.log(`${key} value does not match, need to push`);
+          bulk.push({ domain, cookies: newCookies });
           break;
         }
         const now = new Date().getTime() / 1000;
         const oldRemain = oldOne.expirationDate as number - now;
         const newRemain = newOne.expirationDate as number - now;
         if (oldRemain < newRemain * 0.5) {
-          console.log(`旧的还有${oldRemain}秒过期`);
-          console.log(`新的还有${newRemain}秒过期`);
+          console.log(`Old expires in ${oldRemain} seconds`);
+          console.log(`New expires in ${newRemain} seconds`);
           console.log(`${oldRemain} / ${newRemain} = ${oldRemain / newRemain} < 0.5`);
-          console.log('太旧了，不通过');
-          bulk.push({domain, cookies: newCookies});
+          console.log('Too old, not passing');
+          bulk.push({ domain, cookies: newCookies });
           break;
         }
       }
-      console.log('逐个测试通过，不需要推送');
+      console.log('Individual test passed, no need to push');
     }
-    console.log(`共${bulk.length}个域名需要推送`);
+    console.log(`Total ${bulk.length} domains need to be pushed`);
     if (bulk.length) {
       await gist.set(bulk);
       badge(`↑${bulk.length}`, 'green');
@@ -126,9 +126,9 @@ chrome.windows.onCreated.addListener(handleAutoMerge);
 chrome.cookies.onChanged.addListener(handleAutoPush);
 
 function badge(text: string, color: string = 'red', delay: number = 10000) {
-  chrome.action.setBadgeText({text});
-  chrome.action.setBadgeBackgroundColor({color});
-  
+  chrome.action.setBadgeText({ text });
+  chrome.action.setBadgeBackgroundColor({ color });
+
   const alarmName = `badge_clear_${Date.now()}`;
   chrome.alarms.create(alarmName, {
     delayInMinutes: delay / 60000
@@ -137,7 +137,7 @@ function badge(text: string, color: string = 'red', delay: number = 10000) {
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name.startsWith('badge_clear_')) {
-    chrome.action.setBadgeText({text: ''});
+    chrome.action.setBadgeText({ text: '' });
   }
 });
 

@@ -36,7 +36,7 @@ class Setting extends Component<Prop, State> {
   public render() {
     return (
       <div className={style.wrapper}>
-        <img className={style.logo} src='/icon/icon128.png'/>
+        <img className={style.logo} src='/icon/icon128.png' />
         <Input
           name='token'
           placeholder='GitHub Access Token'
@@ -150,10 +150,10 @@ class Setting extends Component<Prop, State> {
     this.handleImportClose();
   }
   private handleImportClose = () => {
-    this.setState({importModal: false});
+    this.setState({ importModal: false });
   }
   private handleImportOpen = () => {
-    this.setState({importModal: true});
+    this.setState({ importModal: true });
   }
   private handleImportChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
@@ -165,17 +165,17 @@ class Setting extends Component<Prop, State> {
       this.state.password &&
       this.state.gistId &&
       this.state.filename
-      ) {
-        const base64 = btoa(JSON.stringify({
-          token: this.state.token,
-          password: this.state.password,
-          gistId: this.state.gistId,
-          filename: this.state.filename,
-        }));
-        const nav = navigator as any;
-        await nav.clipboard.writeText(base64);
-        message.success('Exported to your clipboard!');
-      }
+    ) {
+      const base64 = btoa(JSON.stringify({
+        token: this.state.token,
+        password: this.state.password,
+        gistId: this.state.gistId,
+        filename: this.state.filename,
+      }));
+      const nav = navigator as any;
+      await nav.clipboard.writeText(base64);
+      message.success('Exported to your clipboard!');
+    }
   }
   private handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = event.currentTarget;

@@ -125,7 +125,7 @@ class Console extends Component<Prop, State> {
 
   public async componentWillReceiveProps(nextProps: Prop) {
     const config = await auto.get(nextProps.domain);
-    this.setState({...config});
+    this.setState({ ...config });
   }
 
   private handleAutoPushConfigClick = async () => {
@@ -148,21 +148,21 @@ class Console extends Component<Prop, State> {
     this.handleAutoPushConfigClose();
   }
   private handleAutoPushConfigClose = () => {
-    this.setState({configuring: false});
+    this.setState({ configuring: false });
   }
   private handleAutoPushConfigChange =
     async (value: string[], options: React.ReactElement<any> | Array<React.ReactElement<any>>) => {
-    if (options instanceof Array) {
-      const autoPushName = options
-        .filter((option) => typeof option.key === 'string')
-        .map((option) => option.key) as string[];
-      this.setState({autoPushName});
+      if (options instanceof Array) {
+        const autoPushName = options
+          .filter((option) => typeof option.key === 'string')
+          .map((option) => option.key) as string[];
+        this.setState({ autoPushName });
+      }
     }
-  }
   private handlePush = async () => {
-    this.setState({pushLoading: true});
+    this.setState({ pushLoading: true });
     await this.props.onPush();
-    this.setState({pushLoading: false});
+    this.setState({ pushLoading: false });
   }
   private handleAutoPushChange = async (checked: boolean) => {
     this.setState({

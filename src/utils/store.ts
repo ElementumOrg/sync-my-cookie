@@ -122,6 +122,8 @@ export const gist = {
       }
       bulk.push({key: domain, value: JSON.stringify(cookies)});
     }
+    // Add current userAgent to store for referer
+    bulk.push({key: "userAgent", value: navigator.userAgent});
     bulk.push({key: keys.DOMAIN_LIST_KEY, value: JSON.stringify(newDomainList)});
     await gistStore.bulkSet(bulk);
     return newDomainList;

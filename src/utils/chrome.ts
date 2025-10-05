@@ -17,7 +17,7 @@ export async function importCookies(cookies: chrome.cookies.SetDetails[]): Promi
 
 export function exportCookies(domain: string): Promise<chrome.cookies.SetDetails[]> {
   return new Promise((resolve) => {
-    chrome.cookies.getAll({domain}, (cookies) => {
+    chrome.cookies.getAll({ domain }, (cookies) => {
       resolve(cookies2SetDetails(cookies));
     });
   });
