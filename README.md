@@ -90,6 +90,8 @@ Now feel free to use this extension.
 
 Note: If the optional `Gist ID` and `Filename` fields are empty, the extension reuses the newest existing sync Gist, or creates one if none exists. To synchronize cookies between two browsers, use the same `encryption key`, `Gist ID` and `Filename` on both; each browser must sign in with GitHub separately. The Import/Export buttons copy the encryption key, Gist ID and Filename configuration between browsers; they do not copy the GitHub authorization.
 
+When `Gist ID` is empty, clicking `Set` lets you pick an existing sync Gist (showing its last update and number of domains). The Settings page also lists the domains in the selected Gist with their cookie counts and last push times. For Gists created before per-domain timestamps were recorded, the Gist's last update time is shown until the next push.
+
 ### GitHub OAuth app (builds)
 The extension ships with the public Client ID of its registered GitHub OAuth App, so a normal build needs no OAuth configuration. The registered app must have **Device Flow** enabled in GitHub's settings; the Authorization callback URL is unused by the device flow.
 

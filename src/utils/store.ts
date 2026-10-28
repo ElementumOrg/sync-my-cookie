@@ -125,9 +125,29 @@ export const gist = {
       }
       bulk.push({key: domain, value: JSON.stringify(cookies)});
     }
+    // Record the last sync time for each domain written by this call.
+    let meta: {[domain: string]: string} = {};
+    try {
+      meta = JSON.parse(await gistStore.get(keys.DOMAIN_META_KEY) || '{}');
+    } catch (err) {
+      meta = {};
+    }
+    const previousUpdatedAt = kevastGist ? kevastGist.getUpdatedAt() : undefined;
+    const now = new Date().toISOString();
+    for (const {domain} of list) {
+      meta[domain] = now;
+    }
+    if (previousUpdatedAt) {
+      for (const domain of newDomainList) {
+        if (!meta[domain]) {
+          meta[domain] = previousUpdatedAt;
+        }
+      }
+    }
     // Add current userAgent to store for referer
     bulk.push({key: "__userAgent", value: navigator.userAgent});
     bulk.push({key: keys.DOMAIN_LIST_KEY, value: JSON.stringify(newDomainList)});
+    bulk.push({key: keys.DOMAIN_META_KEY, value: JSON.stringify(meta)});
     await gistStore.bulkSet(bulk);
     return newDomainList;
   },
@@ -136,8 +156,16 @@ export const gist = {
       domainList = await gist.getDomainList();
     }
     const newDomainList = [...domainList].filter((d) => d !== domain);
+    let meta: {[domain: string]: string} = {};
+    try {
+      meta = JSON.parse(await gistStore.get(keys.DOMAIN_META_KEY) || '{}');
+    } catch (err) {
+      meta = {};
+    }
+    delete meta[domain];
     const bulk: Pair[] = [
       {key: keys.DOMAIN_LIST_KEY, value: JSON.stringify(newDomainList)},
+      {key: keys.DOMAIN_META_KEY, value: JSON.stringify(meta)},
       {key: domain, value: undefined},
     ];
     await gistStore.bulkSet(bulk);

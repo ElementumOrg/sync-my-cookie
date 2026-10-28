@@ -4,8 +4,78 @@ interface KVMap {
     [key: string]: string | undefined
 }
 
-const DEFAULT_FILENAME = "kevast-gist-default.json"
+export const DEFAULT_FILENAME = "kevast-gist-default.json"
 const GIST_DESCRIPTION = "This file is used by KevastGist."
+
+export interface GistCandidate {
+    id: string
+    updatedAt: string
+    domains: string[]
+}
+
+export async function listGistCandidates(token: string): Promise<GistCandidate[]> {
+    const candidates: GistCandidate[] = []
+    for (let page = 1; ; page++) {
+        const response = await fetch(`https://api.github.com/gists?per_page=100&page=${page}`, {
+            headers: {
+                Authorization: `token ${token}`,
+                "Cache-Control": "no-cache, no-store",
+            },
+        })
+        if (!response.ok) {
+            throw new Error(`Failed to list gists: ${response.status}`)
+        }
+        const gists = await response.json()
+        for (const gist of gists) {
+            if (gist.public !== false ||
+                gist.description !== GIST_DESCRIPTION ||
+                !gist.files ||
+                !gist.files[DEFAULT_FILENAME]) {
+                continue
+            }
+            const file = gist.files[DEFAULT_FILENAME]
+            let content = file.content || ""
+            if (!content && gist.url) {
+                const detail = await fetch(gist.url, {
+                    headers: {
+                        Authorization: `token ${token}`,
+                        "Cache-Control": "no-cache, no-store",
+                    },
+                })
+                if (detail.ok) {
+                    const data = await detail.json()
+                    const detailFile = data.files && data.files[DEFAULT_FILENAME]
+                    if (detailFile) {
+                        content = detailFile.truncated ? "" : detailFile.content || ""
+                    }
+                }
+            }
+            if (!content && file.raw_url) {
+                const raw = await fetch(file.raw_url)
+                if (raw.ok) {
+                    content = await raw.text()
+                }
+            }
+            let domains: string[] = []
+            try {
+                const map = JSON.parse(content)
+                domains = Object.keys(map).filter((key) => !key.startsWith("__") && key !== "userAgent")
+            } catch (err) {
+                // Ignore malformed gist content; it can still be selected.
+            }
+            candidates.push({
+                id: gist.id,
+                updatedAt: gist.updated_at,
+                domains,
+            })
+        }
+        if (gists.length < 100) {
+            break
+        }
+    }
+    candidates.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    return candidates
+}
 
 export class KevastGist implements Storage {
     private gistId: string
@@ -13,6 +83,7 @@ export class KevastGist implements Storage {
     private cache: KVMap
     private initialized: boolean
     private token: string
+    private updatedAt?: string
 
     public constructor(token: string, gistId?: string, filename?: string) {
         if (typeof token !== "string") {
@@ -54,6 +125,9 @@ export class KevastGist implements Storage {
             await this.init()
         }
         return this.filename
+    }
+    public getUpdatedAt(): string | undefined {
+        return this.updatedAt
     }
     public async init(): Promise<void> {
         if (this.initialized) {
@@ -117,6 +191,7 @@ export class KevastGist implements Storage {
             throw new Error(`Failed to read gist: ${response.status}`)
         }
         const data = await response.json()
+        this.updatedAt = data.updated_at
         const file = data.files[this.filename]
         if (!file) {
             // Create a new one owns the filename
@@ -164,36 +239,8 @@ export class KevastGist implements Storage {
         }
     }
     private async findGist(): Promise<string | undefined> {
-        let latestId: string | undefined
-        let latestUpdated = 0
-        for (let page = 1; ; page++) {
-            const response = await fetch(`https://api.github.com/gists?per_page=100&page=${page}`, {
-                headers: {
-                    Authorization: `token ${this.token}`,
-                    "Cache-Control": "no-cache, no-store",
-                },
-            })
-            if (!response.ok) {
-                throw new Error(`Failed to list gists: ${response.status}`)
-            }
-            const gists = await response.json()
-            for (const gist of gists) {
-                if (gist.public === false &&
-                    gist.description === GIST_DESCRIPTION &&
-                    gist.files &&
-                    gist.files[this.filename]) {
-                    const updated = Date.parse(gist.updated_at)
-                    if (!latestId || updated > latestUpdated) {
-                        latestId = gist.id
-                        latestUpdated = updated
-                    }
-                }
-            }
-            if (gists.length < 100) {
-                break
-            }
-        }
-        return latestId
+        const candidates = await listGistCandidates(this.token)
+        return candidates.length ? candidates[0].id : undefined
     }
     private async createGist(): Promise<string> {
         const payload = {

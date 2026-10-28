@@ -60,4 +60,95 @@
       width: 48%;
     }
   }
+
+  .domains {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+  }
+
+  .domainsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .domainsList {
+    max-height: 140px;
+    overflow-y: auto;
+  }
+
+  .domainRow {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 12px;
+  }
+
+  .domainName {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .domainCount {
+    width: 70px;
+    text-align: right;
+    color: #666;
+  }
+
+  .domainDate {
+    width: 150px;
+    text-align: right;
+    color: #999;
+  }
+
+  .domainsEmpty,
+  .domainsError {
+    padding: 6px 0;
+    color: #999;
+    font-size: 12px;
+  }
+
+  .domainsError {
+    color: #f5222d;
+  }
+
+  .gistList {
+    display: block;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .gistItem {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    white-space: normal;
+  }
+
+  .gistTitle {
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  .gistMeta {
+    color: #666;
+    font-size: 12px;
+  }
+
+  .gistDomains {
+    color: #999;
+    font-size: 11px;
+    word-break: break-all;
+  }
+
+  .center {
+    padding: 20px 0;
+    text-align: center;
+  }
 }
