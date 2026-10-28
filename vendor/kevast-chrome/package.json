@@ -1,0 +1,7 @@
+{
+  "name": "kevast-chrome",
+  "version": "0.0.2",
+  "description": "Chrome storage for kevast.",
+  "main": "dist/index.js",
+  "license": "MIT"
+}

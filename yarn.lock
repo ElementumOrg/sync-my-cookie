@@ -3927,22 +3927,16 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-kevast-chrome@^0.0.2:
+"kevast-chrome@file:vendor/kevast-chrome":
   version "0.0.2"
-  resolved "https://registry.npmjs.org/kevast-chrome/-/kevast-chrome-0.0.2.tgz"
-  integrity sha512-Svr+54Dx+NYibcGNGF3dkaa8+UWAKdkawb6SejUCsFR221N99ThvFMztGyb/7IstTI280fmq6v95v+D+UDTFiw==
 
-kevast-encrypt@^0.1.1:
+"kevast-encrypt@file:vendor/kevast-encrypt":
   version "0.1.1"
-  resolved "https://registry.npmjs.org/kevast-encrypt/-/kevast-encrypt-0.1.1.tgz"
-  integrity sha512-B2H/smsPl3CxLFKNySHVNTBwF6V+5oOA/y8PlCS5ck/Fey/tHIm/6rFQN6897ZgX9yrowN3/0LIaV+DjFTieDQ==
   dependencies:
     node-forge "^0.7.6"
 
-kevast@^0.4.3:
+"kevast@file:vendor/kevast":
   version "0.4.3"
-  resolved "https://registry.npmjs.org/kevast/-/kevast-0.4.3.tgz"
-  integrity sha512-rGxbIhtF1ae9iRCVizz+9Ghk9HHMoQM7nc+DhYlS8SnOSS902OEaPr5oXffwUj15vr2hTbbXZ9Vq4+dxAIHsOg==
 
 killable@^1.0.0:
   version "1.0.1"

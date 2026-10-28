@@ -1,0 +1,7 @@
+{
+  "name": "kevast",
+  "version": "0.4.3",
+  "description": "Key-value store with middleware.",
+  "main": "dist/index.js",
+  "license": "MIT"
+}
