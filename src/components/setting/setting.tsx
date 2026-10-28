@@ -574,14 +574,20 @@ class Setting extends Component<Prop, State> {
         {item.cookies.length === 0 ? (
           <div className={style.cookieEmpty}>No cookies</div>
         ) : (
-          item.cookies.map((cookie, index) => (
-            <div key={`${cookie.name}-${index}`} className={style.cookieRow}>
-              <span className={style.cookieName}>{cookie.name}</span>
-              <span className={style.cookieExpiry}>
-                {this.formatExpiration(cookie.expirationDate)}
-              </span>
+          <>
+            <div className={[style.cookieRow, style.cookieHeader].join(' ')}>
+              <span>Cookie</span>
+              <span>Expires</span>
             </div>
-          ))
+            {item.cookies.map((cookie, index) => (
+              <div key={`${cookie.name}-${index}`} className={style.cookieRow}>
+                <span className={style.cookieName}>{cookie.name}</span>
+                <span className={style.cookieExpiry}>
+                  {this.formatExpiration(cookie.expirationDate)}
+                </span>
+              </div>
+            ))}
+          </>
         )}
       </div>
     );
