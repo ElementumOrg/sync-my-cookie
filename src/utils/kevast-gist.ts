@@ -63,6 +63,7 @@ export async function listGistCandidates(token: string): Promise<GistCandidate[]
             } catch (err) {
                 // Ignore malformed gist content; it can still be selected.
             }
+            domains.sort((a, b) => a.localeCompare(b))
             candidates.push({
                 id: gist.id,
                 updatedAt: gist.updated_at,

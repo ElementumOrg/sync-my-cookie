@@ -83,9 +83,13 @@
   .domainRow {
     display: flex;
     align-items: center;
-    padding: 4px 0;
-    border-bottom: 1px solid #f5f5f5;
+    padding: 6px 4px;
+    border-bottom: 1px solid #f0f0f0;
     font-size: 12px;
+
+    &:nth-child(odd) {
+      background-color: #fafafa;
+    }
   }
 
   .domainName {
@@ -98,12 +102,14 @@
   .domainCount {
     width: 70px;
     text-align: right;
+    white-space: nowrap;
     color: #666;
   }
 
   .domainDate {
     width: 150px;
     text-align: right;
+    white-space: nowrap;
     color: #999;
   }
 
@@ -118,33 +124,104 @@
     color: #f5222d;
   }
 
-  .gistList {
-    display: block;
-    max-height: 300px;
+  .cookiePopover {
+    width: 340px;
+  }
+
+  .cookieList {
+    max-height: 260px;
     overflow-y: auto;
   }
 
-  .gistItem {
+  .cookieRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 12px;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .cookieName {
+    overflow-wrap: anywhere;
+  }
+
+  .cookieExpiry {
+    color: #999;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .cookieEmpty {
+    color: #999;
+    font-size: 12px;
+  }
+
+  .gistList {
+    display: block;
+    max-height: 300px;
+    padding-right: 4px;
+    overflow-y: auto;
+  }
+
+  .gistList .gistItem {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 10px;
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
     white-space: normal;
+    cursor: pointer;
+    transition: border-color .2s, background-color .2s;
+
+    &:hover {
+      border-color: #40a9ff;
+      background-color: #fafafa;
+    }
+
+    > span:first-child {
+      margin-top: 2px;
+    }
+
+    > span:last-child {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .gistList .gistItemActive,
+  .gistList .gistItemActive:hover {
+    border-color: #40a9ff;
+    background-color: #e6f7ff;
   }
 
   .gistTitle {
     font-family: monospace;
     font-size: 12px;
+    overflow-wrap: anywhere;
   }
 
   .gistMeta {
+    margin-top: 2px;
     color: #666;
     font-size: 12px;
   }
 
   .gistDomains {
+    margin-top: 4px;
     color: #999;
     font-size: 11px;
-    word-break: break-all;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .center {

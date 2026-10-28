@@ -3,7 +3,7 @@ import './setting.scss';
 const style = require('./setting.module.scss');
 
 import { Modal } from 'antd';
-import { Button, Collapse, Icon, Input, message, Radio, Spin, Tooltip } from 'antd';
+import { Button, Collapse, Icon, Input, message, Popover, Radio, Spin, Tooltip } from 'antd';
 
 import { Kevast } from 'kevast';
 import { KevastEncrypt } from 'kevast-encrypt';
@@ -21,6 +21,13 @@ interface Prop {
   onSet: () => void;
 }
 
+interface DomainInfo {
+  domain: string;
+  cookieCount: number;
+  lastSynced?: string;
+  cookies: Array<{name: string, expirationDate?: number}>;
+}
+
 export interface State {
   token: string;
   login: string;
@@ -34,7 +41,7 @@ export interface State {
   gists: GistCandidate[];
   gistsLoading: boolean;
   selectedGistId?: string;
-  domains: Array<{domain: string, cookieCount: number, lastSynced?: string}>;
+  domains: DomainInfo[];
   domainsLoading: boolean;
   domainsError: string;
   importModal: boolean;
@@ -237,13 +244,21 @@ class Setting extends Component<Prop, State> {
           ) : (
             <div className={style.domainsList}>
               {this.state.domains.map((item) => (
-                <div key={item.domain} className={style.domainRow}>
-                  <span className={style.domainName}>{item.domain}</span>
-                  <span className={style.domainCount}>
-                    {item.cookieCount} {item.cookieCount === 1 ? 'cookie' : 'cookies'}
-                  </span>
-                  <span className={style.domainDate}>{this.formatDate(item.lastSynced)}</span>
-                </div>
+                <Popover
+                  key={item.domain}
+                  placement='left'
+                  overlayClassName={style.cookiePopover}
+                  title={item.domain}
+                  content={this.renderCookieList(item)}
+                >
+                  <div className={style.domainRow}>
+                    <span className={style.domainName}>{item.domain}</span>
+                    <span className={style.domainCount}>
+                      {item.cookieCount} {item.cookieCount === 1 ? 'cookie' : 'cookies'}
+                    </span>
+                    <span className={style.domainDate}>{this.formatDate(item.lastSynced)}</span>
+                  </div>
+                </Popover>
               ))}
             </div>
           )}
@@ -267,7 +282,12 @@ class Setting extends Component<Prop, State> {
               onChange={this.handleGistSelectChange}
             >
               {this.state.gists.map((gist) => (
-                <Radio key={gist.id} value={gist.id} className={style.gistItem}>
+                <Radio
+                  key={gist.id}
+                  value={gist.id}
+                  className={[style.gistItem, this.state.selectedGistId === gist.id && style.gistItemActive]
+                    .filter(Boolean).join(' ')}
+                >
                   <div className={style.gistTitle}>{gist.id}</div>
                   <div className={style.gistMeta}>
                     {gist.domains.length} {gist.domains.length === 1 ? 'domain' : 'domains'}
@@ -522,15 +542,23 @@ class Setting extends Component<Prop, State> {
       const domainList = JSON.parse(await store.get(keys.DOMAIN_LIST_KEY) || '[]') as string[];
       const meta = JSON.parse(await store.get(keys.DOMAIN_META_KEY) || '{}') as {[domain: string]: string};
       const updatedAt = gistStorage.getUpdatedAt();
-      const domains: Array<{domain: string, cookieCount: number, lastSynced?: string}> = [];
+      const domains: DomainInfo[] = [];
       for (const domain of domainList) {
-        const cookies = JSON.parse(await store.get(domain) || '[]');
+        const parsed = JSON.parse(await store.get(domain) || '[]');
+        const cookies = (Array.isArray(parsed) ? parsed : [])
+          .map((cookie: any) => ({
+            name: cookie.name as string,
+            expirationDate: cookie.expirationDate as number | undefined,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
         domains.push({
           domain,
-          cookieCount: Array.isArray(cookies) ? cookies.length : 0,
+          cookieCount: cookies.length,
           lastSynced: meta[domain] || updatedAt,
+          cookies,
         });
       }
+      domains.sort((a, b) => a.domain.localeCompare(b.domain));
       this.setState({ domains, domainsLoading: false });
     } catch (err) {
       this.setState({
@@ -540,12 +568,37 @@ class Setting extends Component<Prop, State> {
       });
     }
   }
+  private renderCookieList(item: DomainInfo) {
+    return (
+      <div className={style.cookieList}>
+        {item.cookies.length === 0 ? (
+          <div className={style.cookieEmpty}>No cookies</div>
+        ) : (
+          item.cookies.map((cookie, index) => (
+            <div key={`${cookie.name}-${index}`} className={style.cookieRow}>
+              <span className={style.cookieName}>{cookie.name}</span>
+              <span className={style.cookieExpiry}>
+                {this.formatExpiration(cookie.expirationDate)}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  }
   private formatDate(value?: string): string {
     if (!value) {
       return 'Unknown';
     }
     const date = new Date(value);
     return isNaN(date.getTime()) ? 'Unknown' : date.toLocaleString();
+  }
+  private formatExpiration(expirationDate?: number): string {
+    if (!expirationDate) {
+      return 'Session';
+    }
+    const date = new Date(expirationDate * 1000);
+    return isNaN(date.getTime()) ? 'Session' : date.toLocaleString();
   }
 }
 
