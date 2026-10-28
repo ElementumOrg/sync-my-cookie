@@ -5,6 +5,7 @@ interface KVMap {
 }
 
 const DEFAULT_FILENAME = "kevast-gist-default.json"
+const GIST_DESCRIPTION = "This file is used by KevastGist."
 
 export class KevastGist implements Storage {
     private gistId: string
@@ -70,15 +71,15 @@ export class KevastGist implements Storage {
         if (!force && !this.initialized) {
             await this.init()
         }
-        if (this.gistId && this.filename) {
-            this.cache = await this.read()
-        }
         if (!this.gistId) {
             this.filename = DEFAULT_FILENAME
-            this.gistId = this.gistId = await this.createGist()
-            this.cache = {}
+            this.gistId = await this.findGist() || await this.createGist()
+            this.cache = await this.read()
+            return
         }
-        if (!this.filename) {
+        if (this.filename) {
+            this.cache = await this.read()
+        } else {
             this.filename = DEFAULT_FILENAME
             await this.createFile()
             this.cache = {}
@@ -162,9 +163,41 @@ export class KevastGist implements Storage {
             throw new Error(`Failed to create file: ${response.status}`)
         }
     }
+    private async findGist(): Promise<string | undefined> {
+        let latestId: string | undefined
+        let latestUpdated = 0
+        for (let page = 1; ; page++) {
+            const response = await fetch(`https://api.github.com/gists?per_page=100&page=${page}`, {
+                headers: {
+                    Authorization: `token ${this.token}`,
+                    "Cache-Control": "no-cache, no-store",
+                },
+            })
+            if (!response.ok) {
+                throw new Error(`Failed to list gists: ${response.status}`)
+            }
+            const gists = await response.json()
+            for (const gist of gists) {
+                if (gist.public === false &&
+                    gist.description === GIST_DESCRIPTION &&
+                    gist.files &&
+                    gist.files[this.filename]) {
+                    const updated = Date.parse(gist.updated_at)
+                    if (!latestId || updated > latestUpdated) {
+                        latestId = gist.id
+                        latestUpdated = updated
+                    }
+                }
+            }
+            if (gists.length < 100) {
+                break
+            }
+        }
+        return latestId
+    }
     private async createGist(): Promise<string> {
         const payload = {
-            description: "This file is used by KevastGist.",
+            description: GIST_DESCRIPTION,
             public: false,
             files: {
                 [this.filename]: {
