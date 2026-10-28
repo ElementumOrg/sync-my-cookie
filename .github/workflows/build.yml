@@ -1,0 +1,44 @@
+name: Build extension
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+
+      - name: Package
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          (cd build && zip -9 -r "../sync-my-cookie-${VERSION}.zip" .)
+
+      - name: Upload installable extension
+        uses: actions/upload-artifact@v7
+        with:
+          path: sync-my-cookie-*.zip
+          archive: false
+          if-no-files-found: error
