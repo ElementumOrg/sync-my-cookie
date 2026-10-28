@@ -84,11 +84,11 @@ Right click on the extension and click on `Options`.
 Click **Sign in with GitHub**. A dialog shows a short code; enter it on <https://github.com/login/device> and authorize the extension. Only the `gist` scope is requested; you don't need to create a personal access token.
 
 ### Configure Extension
-After signing in, set a password to encrypt the data and click `Set`. The password is the encryption key for the Gist data, so use the same password on every browser.
+After signing in, set an encryption key to encrypt the data and click `Set`. The key is used to encrypt the Gist data, so use the same key on every browser.
 
 Now feel free to use this extension.
 
-Note: If the optional `Gist ID` and `Filename` fields are empty, the extension reuses the newest existing sync Gist, or creates one if none exists. To synchronize cookies between two browsers, use the same `password`, `Gist ID` and `Filename` on both; each browser must sign in with GitHub separately. The Import/Export buttons copy the password, Gist ID and Filename configuration between browsers; they do not copy the GitHub authorization.
+Note: If the optional `Gist ID` and `Filename` fields are empty, the extension reuses the newest existing sync Gist, or creates one if none exists. To synchronize cookies between two browsers, use the same `encryption key`, `Gist ID` and `Filename` on both; each browser must sign in with GitHub separately. The Import/Export buttons copy the encryption key, Gist ID and Filename configuration between browsers; they do not copy the GitHub authorization.
 
 ### GitHub OAuth app (builds)
 The extension ships with the public Client ID of its registered GitHub OAuth App, so a normal build needs no OAuth configuration. The registered app must have **Device Flow** enabled in GitHub's settings; the Authorization callback URL is unused by the device flow.
@@ -146,7 +146,7 @@ Since cookies are a very important security credential, please use this extensio
 
 By using `HTTPS` and `AES-128-CBC`, this extension guarantees that your cookies are safe during the transfer and storage process, but you still need to be aware of the following:
 
-- To keep your cookies safe, please don't disclose your configuration, especially your password. This will cause your cookies to be completely exposed to others.
+- To keep your cookies safe, please don't disclose your configuration, especially your encryption key. This will cause your cookies to be completely exposed to others.
 - This extension requests only the `gist` scope during GitHub authorization.
 - In theory, multiple devices using the same cookie can use some services at the same time, but this is related to the service provider's detection mechanism. So the risk of using this extension for account sharing is uncertain.
 

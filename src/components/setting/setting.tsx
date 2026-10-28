@@ -58,16 +58,24 @@ class Setting extends Component<Prop, State> {
             </Button>
           </div>
         ) : (
-          <Button
-            type='primary'
-            icon='github'
-            block={true}
-            className={style.input}
-            loading={this.state.authLoading}
-            onClick={this.handleAuthorize}
-          >
-            Sign in with GitHub
-          </Button>
+          <div>
+            {!this.state.authLoading && (
+              <p className={style.hint}>
+                Sign in with GitHub to let SyncMyCookie access your private Gists.
+                Only the <b>gist</b> scope is requested.
+              </p>
+            )}
+            <Button
+              type='primary'
+              icon='github'
+              block={true}
+              className={style.input}
+              loading={this.state.authLoading}
+              onClick={this.handleAuthorize}
+            >
+              Sign in with GitHub
+            </Button>
+          </div>
         )}
         <Modal
           title='Authorize with GitHub'
@@ -89,10 +97,16 @@ class Setting extends Component<Prop, State> {
             </div>
           )}
         </Modal>
-        <Tooltip title='NOT your GitHub password, but a key to encrypt your cookies.' placement='topLeft'>
+        <Tooltip
+          title={
+            'Encryption key for your cookie data. Use the same key on every browser. ' +
+            'This is not your GitHub password.'
+          }
+          placement='topLeft'
+        >
           <Input
             name='password'
-            placeholder='Password'
+            placeholder='Encryption key'
             prefix={<Icon type='key' style={{ color: 'rgba(0,0,0,.25)' }} />}
             allowClear={true}
             onChange={this.handleChange}

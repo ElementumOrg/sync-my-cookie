@@ -30,11 +30,14 @@ class Popup extends Component<{}, State> {
     return this.state.isSetting ? (
       <div className={style.wrapper}>
         <div className={style.settingWrapper}>
-          <div>
-            <p>
-              SyncMyCookie is not configured yet. Open Settings to sign in with GitHub
-              and set an encryption password.
-            </p>
+          <div className={style.setup}>
+            <h3>Setup required</h3>
+            <p>SyncMyCookie needs GitHub access and an encryption key:</p>
+            <ol>
+              <li>Open Settings.</li>
+              <li>Click <b>Sign in with GitHub</b> and enter the code shown on GitHub.</li>
+              <li>Set an encryption key and click <b>Set</b>.</li>
+            </ol>
             <Button type='primary' onClick={this.handleOpenSettings}>Open Settings</Button>
           </div>
         </div>
