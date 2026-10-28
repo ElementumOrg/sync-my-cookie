@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
@@ -17,6 +18,9 @@ function create(file) {
   const ext = parsed.ext;
   const plugins = [
     new LodashModuleReplacementPlugin(),
+    new webpack.DefinePlugin({
+      __GITHUB_CLIENT_ID__: JSON.stringify(process.env.GITHUB_CLIENT_ID || ''),
+    }),
     // new BundleAnalyzerPlugin(),
   ];
   if (ext === '.tsx') {

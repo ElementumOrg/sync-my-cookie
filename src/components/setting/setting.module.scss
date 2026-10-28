@@ -10,6 +10,21 @@
     margin-bottom: 10px;
   }
 
+  .auth {
+    min-height: 32px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .code {
+    margin: 10px 0;
+    font-family: monospace;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
   .filename {
     margin-bottom: 0;
   }

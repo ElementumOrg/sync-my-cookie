@@ -3,10 +3,9 @@ import ReactDom from 'react-dom';
 const style = require('./popup.module.scss');
 import './global.scss';
 
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 import Console from './components/console/console';
 import Domains from './components/domain-list/domain-list';
-import Setting from './components/setting/setting';
 
 import * as chromeUtils from './utils/chrome';
 import { auto, gist } from './utils/store';
@@ -30,7 +29,15 @@ class Popup extends Component<{}, State> {
   public render() {
     return this.state.isSetting ? (
       <div className={style.wrapper}>
-        <Setting onSet={this.handleSet} />
+        <div className={style.settingWrapper}>
+          <div>
+            <p>
+              SyncMyCookie is not configured yet. Open Settings to sign in with GitHub
+              and set an encryption password.
+            </p>
+            <Button type='primary' onClick={this.handleOpenSettings}>Open Settings</Button>
+          </div>
+        </div>
       </div>
     ) : (
       <div className={style.wrapper}>
@@ -135,11 +142,9 @@ class Popup extends Component<{}, State> {
     });
   }
 
-  private handleSet = async () => {
-    this.setState({
-      isSetting: false,
-    });
-    this.initGist();
+  private handleOpenSettings = () => {
+    chrome.runtime.openOptionsPage();
+    window.close();
   }
 
   private async initGist() {
@@ -150,12 +155,18 @@ class Popup extends Component<{}, State> {
       });
       return;
     }
-    const domainList = await gist.getDomainList();
-    this.setState((prevState) => {
-      return {
-        domainList: move2Front(domainList, prevState.currentDomain),
-      };
-    });
+    try {
+      const domainList = await gist.getDomainList();
+      this.setState((prevState) => {
+        return {
+          domainList: move2Front(domainList, prevState.currentDomain),
+        };
+      });
+    } catch (err) {
+      this.setState({
+        isSetting: true,
+      });
+    }
   }
 }
 

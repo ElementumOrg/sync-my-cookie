@@ -45,6 +45,9 @@ export const setting = {
   async get(key: 'token' | 'password' | 'gistId' | 'filename'): Promise<string | undefined> {
     return chromeSync.get(getKey(key));
   },
+  async remove(key: 'token' | 'password' | 'gistId' | 'filename') {
+    await chromeSync.remove(getKey(key));
+  },
 };
 
 export interface AutoConfiguration {
