@@ -1,26 +1,59 @@
 # SyncMyCookie
-[English](https://github.com/Andiedie/sync-my-cookie/blob/master/README.md) | [中文](https://blog.andiedie.cn/posts/abbd/)
+[English](https://github.com/ElementumOrg/sync-my-cookie/blob/master/README.md) | [中文](https://blog.andiedie.cn/posts/abbd/)
 
-SyncMyCookie is a chrome extension to synchronize your cookies.
+SyncMyCookie is a Chrome extension to synchronize your cookies. This is the maintained v3 fork by [ElementumOrg](https://github.com/ElementumOrg); the original project is [Andiedie/sync-my-cookie](https://github.com/Andiedie/sync-my-cookie).
 
 You can specify to sync cookies for any website, configure rules for `Auto Merge` and `Auto Push`.
 
 ## Install
-- Recommended: [Chrome Web Store](https://chrome.google.com/webstore/detail/syncmycookie/laapobniolmbhnkldepjnebendehhmmf)
-- [SyncMyCookie.crx](https://github.com/andiedie/sync-my-cookie/releases/download/v2.0.0/crx.zip)
-- [Pre Built](https://github.com/andiedie/sync-my-cookie/releases/download/v2.0.0/pre-built.zip)
 
-  Enable the `Developer mode` in the Chrome Extension(`chrome://extensions`) and load it via `Load Unpacked`.
-  
-- Build from Source
+Current builds require Chrome (or another Chromium-based browser) **130 or newer** (see `minimum_chrome_version` in `manifest.json`).
 
-  ```bash
-  git clone https://github.com/Andiedie/sync-my-cookie.git
-  cd sync-my-cookie
-  yarn            # npm install
-  yarn build      # npm run build
-  ```
-  And load folder `build` just like the above method.
+### From the Chrome Web Store
+
+[SyncMyCookie v3](https://chromewebstore.google.com/detail/syncmycookie-v3/nbjjnnaeffojibdlfkbafbjnknafefac)
+
+### From a release build
+
+1. Download the latest `sync-my-cookie-<version>.zip` from [Releases](https://github.com/ElementumOrg/sync-my-cookie/releases).
+2. Unzip it.
+3. Open `chrome://extensions` and enable **Developer mode**.
+4. Click **Load unpacked** and select the unzipped folder. It must contain `manifest.json` at its root.
+
+### From source
+
+Requirements: [Node.js](https://nodejs.org/) and [Yarn](https://yarnpkg.com/) (npm works too). On Windows, run the commands in Git Bash or WSL, since the build scripts use Unix shell commands.
+
+```bash
+git clone https://github.com/ElementumOrg/sync-my-cookie.git
+cd sync-my-cookie
+yarn install        # or: npm install
+yarn build          # or: npm run build
+```
+
+`yarn build` compiles the extension into `build/`. Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select that `build` folder.
+
+If the build fails with `error:0308010C:digital envelope routines::unsupported`, webpack 4 needs to be run with the legacy OpenSSL provider:
+
+```bash
+NODE_OPTIONS=--openssl-legacy-provider yarn build
+```
+
+### Development build
+
+```bash
+NODE_OPTIONS=--openssl-legacy-provider yarn dev:chrome
+```
+
+This watches the source files and rebuilds into `build/`. Click the reload icon for the extension on `chrome://extensions` after a rebuild; reopen the popup after popup-only changes.
+
+To build the distributable zip locally:
+
+```bash
+make
+```
+
+It produces `sync-my-cookie-<version>.zip` in the repository root.
 
 ## Scenes to be used
 ### Avoid frequent logins
@@ -41,7 +74,7 @@ You can log in on one browser and enable `Auto Push`. On other browsers, enable 
 ## Configuration
 In order to share cookies across devices, this extension encrypts your cookies and save them in Gist, which requires you to have a GitHub account.
 
-If you have suggestions for using other types of storage to save data, please create an issue [here](https://github.com/Andiedie/sync-my-cookie/issues).
+If you have suggestions for using other types of storage to save data, please create an issue [here](https://github.com/ElementumOrg/sync-my-cookie/issues).
 
 ### Generate GitHub Access Token
 GitHub Access Token (token for short) allows the extension to modify your Gist. You can generate a new token [here](https://github.com/settings/tokens/new).
