@@ -17,8 +17,9 @@ export async function importCookies(cookies: chrome.cookies.SetDetails[]): Promi
 
 export function exportCookies(domain: string): Promise<chrome.cookies.SetDetails[]> {
   return new Promise((resolve) => {
-    chrome.cookies.getAll({ domain }, (cookies) => {
-      resolve(cookies2SetDetails(cookies));
+    // Empty partitionKey also returns partitioned cookies, such as Cloudflare's cf_clearance.
+    chrome.cookies.getAll({ domain, partitionKey: {} }, (cookies) => {
+      resolve(cookies2SetDetails(cookies || []));
     });
   });
 }
@@ -31,9 +32,13 @@ function cookies2SetDetails(cookies: chrome.cookies.Cookie[]): chrome.cookies.Se
       path: cookie.path,
       secure: cookie.secure,
       httpOnly: cookie.httpOnly,
+      sameSite: cookie.sameSite,
       storeId: cookie.storeId,
       url: buildUrl(cookie.secure, cookie.domain, cookie.path),
     };
+    if (cookie.partitionKey) {
+      result.partitionKey = cookie.partitionKey;
+    }
     if (!cookie.hostOnly) {
       result.domain = cookie.domain;
     }
