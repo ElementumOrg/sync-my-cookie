@@ -22,7 +22,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["cookies", "storage", "tabs", "alarms"],
+  "permissions": ["cookies", "storage", "tabs", "alarms", "favicon"],
   "host_permissions": [
     "<all_urls>"
   ]

@@ -20,9 +20,8 @@ class Domain extends Component<Prop> {
         >
           <img
             className={style.img}
-            src={`https://${this.props.domain}/favicon.ico`}
+            src={this.getFaviconUrl()}
             alt='domain icon'
-            onError={this.handleImageError}
           />
           <span className={style.domain}>
             {this.props.domain}
@@ -38,8 +37,12 @@ class Domain extends Component<Prop> {
       </div>
     );
   }
-  private handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    (e.target as HTMLImageElement).style.opacity = '0';
+  private getFaviconUrl(): string {
+    // Chrome's own favicon cache, so sites behind a Cloudflare challenge still show an icon.
+    const url = new URL(chrome.runtime.getURL('/_favicon/'));
+    url.searchParams.set('pageUrl', `https://${this.props.domain}/`);
+    url.searchParams.set('size', '32');
+    return url.toString();
   }
   private handleClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const domain = event.currentTarget.dataset.domain;
